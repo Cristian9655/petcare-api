@@ -368,6 +368,154 @@ Projeto desenvolvido para fins acadêmicos no Challenge FIAP 2026.
 Guia completo para criação da infraestrutura na Azure e execução da aplicação **PetCare API** utilizando Docker e banco de dados H2 conteinerizado.
 
 > Projeto desenvolvido para o Challenge FIAP 2026 utilizando Java + Spring Boot, Docker e Microsoft Azure.
+---
+# 🐳 Explicação do Dockerfile
+
+O projeto utiliza Docker para containerizar a aplicação Spring Boot, permitindo execução padronizada em qualquer ambiente, incluindo máquinas virtuais na Azure.
+
+## 📄 Dockerfile
+
+```dockerfile
+FROM maven:3.9-eclipse-temurin-21
+
+WORKDIR /app
+
+COPY . /app
+
+RUN mvn clean package -DskipTests
+
+RUN adduser --disabled-password --gecos "" \
+    --home /home/appuser \
+    --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app /home/appuser
+
+USER appuser
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "target/petcare-api-0.0.1-SNAPSHOT.jar"]
+```
+
+---
+
+# 🔍 Explicação das Etapas
+
+## `FROM maven:3.9-eclipse-temurin-21`
+
+Define a imagem base utilizada no container.
+
+Neste caso:
+
+* Maven 3.9
+* Java 21 (Eclipse Temurin)
+
+Essa imagem já possui todas as ferramentas necessárias para compilar e executar o projeto Spring Boot.
+
+---
+
+## `WORKDIR /app`
+
+Define o diretório principal da aplicação dentro do container.
+
+Todos os próximos comandos serão executados dentro da pasta:
+
+```bash
+/app
+```
+
+---
+
+## `COPY . /app`
+
+Copia todos os arquivos do projeto para dentro do container Docker.
+
+Inclui:
+
+* código-fonte
+* pom.xml
+* resources
+* Dockerfile
+
+---
+
+## `RUN mvn clean package -DskipTests`
+
+Executa o build do projeto utilizando Maven.
+
+O comando:
+
+* limpa builds antigos
+* compila a aplicação
+* gera o arquivo `.jar`
+
+O parâmetro:
+
+```bash
+-DskipTests
+```
+
+faz com que os testes sejam ignorados durante o build.
+
+---
+
+## 👤 Criação de Usuário Não-Root
+
+```dockerfile
+RUN adduser --disabled-password --gecos "" \
+    --home /home/appuser \
+    --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app /home/appuser
+```
+
+Cria um usuário chamado:
+
+```bash
+appuser
+```
+
+Isso é uma boa prática de segurança, evitando que a aplicação seja executada como usuário root dentro do container.
+
+Além disso:
+
+* cria diretório home
+* ajusta permissões da aplicação
+
+---
+
+## `USER appuser`
+
+Define que a aplicação será executada utilizando o usuário não-administrador criado anteriormente.
+
+Isso ajuda na:
+
+* segurança
+* isolamento
+* conformidade com boas práticas DevOps
+
+---
+
+## `EXPOSE 8080`
+
+Informa que a aplicação utiliza a porta:
+
+```bash
+8080
+```
+
+Porta padrão utilizada pelo Spring Boot.
+
+---
+
+## ▶️ `CMD`
+
+```dockerfile
+CMD ["java", "-jar", "target/petcare-api-0.0.1-SNAPSHOT.jar"]
+```
+
+Comando responsável por iniciar a aplicação quando o container for executado.
+
+O Spring Boot será iniciado através do arquivo `.jar` gerado pelo Maven.
+
 
 ---
 
