@@ -4,8 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-ENV SPRING_PROFILES_ACTIVE=default
-ENV SERVER_PORT=8080
+RUN mvn clean package -DskipTests
 
 RUN adduser --disabled-password --gecos "" \
     --home /home/appuser \
@@ -16,4 +15,4 @@ USER appuser
 
 EXPOSE 8080
 
-CMD ["bash", "-c", "./mvnw clean package -DskipTests && java -jar target/*.jar"]
+CMD ["java", "-jar", "target/petcare-api-0.0.1-SNAPSHOT.jar"]
